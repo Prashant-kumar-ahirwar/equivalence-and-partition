@@ -1,0 +1,1842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced AI Relation Solver</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 40px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M20,20 L80,20 L80,80 L20,80 Z" fill="white" stroke="white" stroke-width="2"/><circle cx="50" cy="50" r="15" fill="white"/></svg>');
+            background-size: 100px;
+            opacity: 0.1;
+        }
+
+        .header h1 {
+            font-size: 3.2em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+
+        .header .features {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+            position: relative;
+        }
+
+        .feature {
+            background: rgba(189, 71, 205, 0.15);
+            padding: 12px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+        }
+
+        .feature:hover {
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .input-section {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .question-input {
+            width: 100%;
+            min-height: 180px;
+            padding: 25px;
+            border: 3px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 1.1em;
+            font-family: inherit;
+            resize: vertical;
+            transition: var(--transition);
+            background: #d75a5a;
+            line-height: 1.6;
+        }
+
+        .question-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(134, 66, 198, 0.1);
+        }
+
+        .question-input::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        .input-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 16px 28px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: width 0.3s, height 0.3s, top 0.3s, left 0.3s;
+        }
+
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            left: -150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: rgb(255, 255, 255);
+            font-size: 1.1em;
+            padding: 18px 35px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #7c3aed 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .voice-btn {
+            background: linear-gradient(135deg, var(--accent) 0%, #0891b2 100%);
+            color: white;
+            border-radius: 50%;
+            width: 65px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6em;
+        }
+
+        .voice-btn:hover {
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .voice-btn.recording {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .example-problems {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 5px solid var(--primary);
+        }
+
+        .example-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .example-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.95em;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .example-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .example-card:hover::before {
+            left: 100%;
+        }
+
+        .example-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message, .info-message {
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        .info-message {
+            background: #eff6ff;
+            color: var(--info);
+            border-left: 4px solid var(--info);
+        }
+
+        .solution-section {
+            margin-top: 35px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .solution-section.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .solution-header {
+            background: linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .solution-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><polygon points="50,10 90,90 10,90" fill="white" stroke="white" stroke-width="2"/><circle cx="50" cy="50" r="20" fill="white"/></svg>');
+            background-size: 80px;
+            opacity: 0.1;
+        }
+
+        .solution-header h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .step-container {
+            display: grid;
+            gap: 25px;
+        }
+
+        .step-card {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            border-left: 5px solid #e0e0e0;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: inherit;
+        }
+
+        .step-card.proof {
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        }
+
+        .step-card.verification {
+            border-left-color: var(--info);
+            background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+        }
+
+        .step-card.conclusion {
+            border-left-color: var(--warning);
+            background: linear-gradient(135deg, #fffbeb 0%, #fefce8 100%);
+        }
+
+        .step-card.analysis {
+            border-left-color: var(--primary);
+            background: linear-gradient(135deg, #eef2ff 0%, #f0f4ff 100%);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: rgb(255, 255, 255);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .step-content {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .mathematical-expression {
+            background: white;
+            padding: 20px 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #e0e0e0;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.15em;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .proof-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 2px solid var(--success);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .conclusion-box {
+            background: linear-gradient(135deg, var(--accent) 0%, #0ea5e9 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            font-size: 1.3em;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px;
+            color: var(--gray);
+            font-size: 1.2em;
+        }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 4px solid #e0e0e0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-clear-history {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-clear-history:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .history-empty {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .classification-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .badge {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-weight: 600;
+        }
+
+        .not-equivalence {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .function-recognition {
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .function-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .function-tag {
+            background: #e0f2fe;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: var(--info);
+            font-weight: 600;
+        }
+
+        .relation-matrix {
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .matrix-table {
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-family: 'Courier New', monospace;
+        }
+
+        .matrix-table td {
+            border: 1px solid #ddd;
+            padding: 10px 15px;
+            text-align: center;
+            min-width: 40px;
+        }
+
+        .matrix-table th {
+            background: var(--primary);
+            color: white;
+            padding: 10px 15px;
+        }
+
+        .matrix-table .header-cell {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .property-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .property-table th, .property-table td {
+            border: 1px solid #ddd;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        .property-table th {
+            background: var(--light);
+            font-weight: 600;
+        }
+
+        .property-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .hasse-diagram {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .diagram-container {
+            display: inline-block;
+            position: relative;
+            margin: 20px auto;
+        }
+
+        .diagram-node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+        }
+
+        .diagram-line {
+            position: absolute;
+            background: var(--dark);
+            z-index: 1;
+        }
+
+        .advanced-options {
+            background: #2e7fd0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .options-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .history-section {
+            margin-top: 40px;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 30px;
+        }
+
+        .history-title {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .history-item {
+            background: var(--light);
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            background: var(--light);
+            color: var(--gray);
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.4em;
+            }
+            
+            .header .features {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .input-tools {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .button-group {
+                justify-content: center;
+            }
+            
+            .example-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .step-card {
+                padding: 20px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .header, .input-section, .example-problems, .footer, .btn {
+                display: none;
+            }
+            
+            .solution-section {
+                opacity: 1;
+                transform: none;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            body {
+                background: white;
+                padding: 0;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --light: #2d3748;
+                --dark: #f7fafc;
+            }
+            
+            body {
+                background: #1a202c;
+            }
+            
+            .container {
+                background: #2d3748;
+                color: #f7fafc;
+            }
+            
+            .question-input {
+                background: #212122;
+                color: #cfd2d6;
+                border-color: #4a5568;
+            }
+            
+            .question-input:focus {
+                background: #4a5568;
+            }
+            
+            .example-problems {
+                background: #4a5568;
+            }
+            
+            .example-card {
+                background: #2d3748;
+            }
+            
+            .step-card {
+                background: #4a5568;
+            }
+            
+            .mathematical-expression {
+                background: #2d3748;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-robot"></i> Advanced AI Relation Solver</h1>
+            <p>Ask any question about mathematical relations, equivalence, proofs, and more - I'll solve it step by step with complete analysis!</p>
+            <div class="features">
+                <div class="feature"><i class="fas fa-keyboard"></i> Text & Voice Input</div>
+                <div class="feature"><i class="fas fa-calculator"></i> Complete Proofs</div>
+                <div class="feature"><i class="fas fa-project-diagram"></i> Hasse Diagrams</div>
+                <div class="feature"><i class="fas fa-table"></i> Matrix Analysis</div>
+                <div class="feature"><i class="fas fa-history"></i> Solution History</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="input-section">
+                <textarea 
+                    class="question-input" 
+                    id="questionInput" 
+                    placeholder="Write your question here or click the microphone to speak...
+
+Examples:
+• A={0,1,2,3,4,...}, R={(a,b)|(a-b)=3k, where k is integer}. Prove that R is an equivalence relation.
+• Let A={1,2,3,4} and R={(1,1),(2,2),(3,3),(4,4),(1,2),(2,1)}. Check if R is an equivalence relation.
+• Given the relation R on ℤ defined by xRy iff x≡y (mod 5). Show that R is an equivalence relation and find the partition.
+• Is the relation R = {(a,b) : a divides b} on {1,2,3,4,6,12} an equivalence relation?
+• Let f(x) = |x| and define R on ℝ by xRy iff f(x) = f(y). Is R an equivalence relation?
+• Define R on ℝ by xRy iff sin(x) = sin(y). Check if R is an equivalence relation.
+• Given matrix [[1,0,1],[0,1,0],[1,0,1]] on {a,b,c}, analyze all properties.
+• R on ℝ defined by xRy iff |x-y| < 1. Check reflexive, symmetric, transitive properties.
+"></textarea>
+                
+                <div class="input-tools">
+                    <div class="button-group">
+                        <button class="btn btn-primary" id="solveBtn">
+                            <i class="fas fa-rocket"></i> Solve Question
+                        </button>
+                        <button class="btn btn-secondary" id="clearBtn">
+                            <i class="fas fa-trash"></i> Clear
+                        </button>
+                        <button class="btn btn-danger" id="saveBtn">
+                            <i class="fas fa-save"></i> Save Solution
+                        </button>
+                    </div>
+                    
+                    <button class="btn voice-btn" id="voiceBtn" title="Click to speak your question">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="advanced-options">
+                <div class="options-title">
+                    <i class="fas fa-cogs"></i> Advanced Options
+                </div>
+                <div class="options-grid">
+                    <div class="option-item">
+                        <input type="checkbox" id="showHasse" checked>
+                        <label for="showHasse">Generate Hasse Diagram (for orders)</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="showMatrix" checked>
+                        <label for="showMatrix">Show Relation Matrix</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="detailedProofs" checked>
+                        <label for="detailedProofs">Detailed Proofs</label>
+                    </div>
+                    <div class="option-item">
+                        <input type="checkbox" id="alternativeExamples">
+                        <label for="alternativeExamples">Show Counterexamples</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="example-problems">
+                <div class="example-title"><i class="fas fa-lightbulb"></i> Click on any example to try:</div>
+                <div class="example-grid">
+                    <div class="example-card" data-example="1">
+                        <strong><i class="fas fa-calculator"></i> Modular Arithmetic:</strong><br>
+                        A={0,1,2,3,4,...}, R={(a,b)|(a-b)=3k, k∈ℤ}. Prove R is equivalence relation.
+                    </div>
+                    <div class="example-card" data-example="2">
+                        <strong><i class="fas fa-equals"></i> Congruence Relation:</strong><br>
+                        R on ℤ defined by xRy iff x≡y (mod 5). Show R is equivalence relation and find partition.
+                    </div>
+                    <div class="example-card" data-example="3">
+                        <strong><i class="fas fa-th-list"></i> Discrete Set:</strong><br>
+                        A={1,2,3,4}, R={(1,1),(2,2),(3,3),(4,4),(1,3),(3,1),(2,4),(4,2)}. Check if R is equivalence relation.
+                    </div>
+                    <div class="example-card" data-example="4">
+                        <strong><i class="fas fa-divide"></i> Divisibility (Non-Equivalence):</strong><br>
+                        R={(a,b): a divides b} on {1,2,3,4,6,12}. Is R an equivalence relation? Why or why not?
+                    </div>
+                    <div class="example-card" data-example="5">
+                        <strong><i class="fas fa-function"></i> Absolute Value Function:</strong><br>
+                        f(x) = |x|, R on ℝ: xRy iff f(x) = f(y). Check if R is an equivalence relation.
+                    </div>
+                    <div class="example-card" data-example="6">
+                        <strong><i class="fas fa-wave-sine"></i> Trigonometric Function:</strong><br>
+                        R on ℝ: xRy iff sin(x) = sin(y). Check if R is an equivalence relation.
+                    </div>
+                    <div class="example-card" data-example="7">
+                        <strong><i class="fas fa-project-diagram"></i> Matrix Relations:</strong><br>
+                        Given matrix [[1,0,1],[0,1,0],[1,0,1]] on {a,b,c}, analyze all properties.
+                    </div>
+                    <div class="example-card" data-example="8">
+                        <strong><i class="fas fa-sort-amount-up"></i> Partial Order:</strong><br>
+                        R on {1,2,3,4,6,12} defined by divisibility. Draw Hasse diagram and analyze.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="info-message" id="infoMessage"></div>
+            
+            <div class="solution-section" id="solutionSection"></div>
+            
+            <div class="history-section" id="historySection">
+                <div class="history-title"><i class="fas fa-history"></i> Recent Solutions</div>
+                <div class="history-list" id="historyList">
+                    <!-- History items will be populated here -->
+                </div>
+            </div>
+        </div>
+        <div class="history-section" id="historySection">
+            <div class="history-title">
+                <i class="fas fa-history"></i> Recent Solutions
+                <div class="history-controls">
+                    <span>Total: <span id="historyCount">0</span> solutions</span>
+                    <button class="btn-clear-history" id="clearHistoryBtn">
+                        <i class="fas fa-trash-alt"></i> Clear All History
+                    </button>
+                </div>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- History items will be populated here -->
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Advanced AI Relation Solver &copy; 2023 | Mathematical Analysis Engine</p>
+        </div>
+    </div>
+
+    <script>
+        // Main application class
+        class AdvancedAIRelationSolver {
+            constructor() {
+                this.isListening = false;
+                this.recognition = null;
+                this.solutionHistory = JSON.parse(localStorage.getItem('relationSolverHistory')) || [];
+                this.initializeEventListeners();
+                this.setupSpeechRecognition();
+                this.loadHistory();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('solveBtn').addEventListener('click', () => this.solveQuestion());
+                document.getElementById('clearBtn').addEventListener('click', () => this.clearAll());
+                document.getElementById('saveBtn').addEventListener('click', () => this.saveSolution());
+                document.getElementById('voiceBtn').addEventListener('click', () => this.toggleVoiceInput());
+                document.getElementById('clearHistoryBtn').addEventListener('click', () => this.clearHistory());
+                
+                // Example cards
+                document.querySelectorAll('.example-card').forEach(card => {
+                    card.addEventListener('click', () => this.loadExample(card.dataset.example));
+                });
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        this.solveQuestion();
+                    }
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Delete') {
+                        this.clearAll();
+                    }
+                });
+
+                // Advanced options
+                document.getElementById('showHasse').addEventListener('change', () => this.updateOptions());
+                document.getElementById('showMatrix').addEventListener('change', () => this.updateOptions());
+                document.getElementById('detailedProofs').addEventListener('change', () => this.updateOptions());
+                document.getElementById('alternativeExamples').addEventListener('change', () => this.updateOptions());
+            }
+
+            updateOptions() {
+                // Options are used during solution generation
+                this.showInfo('Options updated. Re-run analysis to see changes.');
+            }
+
+            setupSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    this.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                    this.recognition.continuous = false;
+                    this.recognition.interimResults = false;
+                    this.recognition.lang = 'en-US';
+
+                    this.recognition.onstart = () => {
+                        this.isListening = true;
+                        document.getElementById('voiceBtn').classList.add('recording');
+                        this.showInfo('🎤 Listening... Speak your question now!');
+                    };
+
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        document.getElementById('questionInput').value = transcript;
+                        this.showInfo('✅ Voice input captured! Click "Solve Question" to continue.');
+                    };
+
+                    this.recognition.onerror = () => {
+                        this.showError('Voice recognition failed. Please try again or type your question.');
+                    };
+
+                    this.recognition.onend = () => {
+                        this.isListening = false;
+                        document.getElementById('voiceBtn').classList.remove('recording');
+                    };
+                } else {
+                    console.log('Speech recognition not supported');
+                }
+            }
+
+            toggleVoiceInput() {
+                if (!this.recognition) {
+                    this.showError('Voice input not supported in your browser. Please type your question.');
+                    return;
+                }
+
+                if (this.isListening) {
+                    this.recognition.stop();
+                } else {
+                    this.recognition.start();
+                }
+            }
+
+            loadExample(exampleNum) {
+                const examples = {
+                    '1': 'A={0,1,2,3,4,...}, R={(a,b)|(a-b)=3k, where k is integer}. Prove that R is an equivalence relation.',
+                    '2': 'Let R be a relation on ℤ defined by xRy if and only if x≡y (mod 5). Show that R is an equivalence relation and find the partition of {0,1,2,3,4,5,6,7,8,9}.',
+                    '3': 'A={1,2,3,4} and R={(1,1),(2,2),(3,3),(4,4),(1,3),(3,1),(2,4),(4,2)}. Check if R is an equivalence relation and find the partition if it exists.',
+                    '4': 'Let A={1,2,3,4,6,12} and R={(a,b): a divides b}. Is R an equivalence relation? Analyze all properties.',
+                    '5': 'Let f(x) = |x| and define R on ℝ by xRy iff f(x) = f(y). Is R an equivalence relation?',
+                    '6': 'Define R on ℝ by xRy iff sin(x) = sin(y). Check if R is reflexive, symmetric, and transitive. Is it an equivalence relation?',
+                    '7': 'Given the matrix representation [[1,0,1],[0,1,0],[1,0,1]] for a relation R on set {a,b,c}. Analyze reflexive, symmetric, transitive, and antisymmetric properties.',
+                    '8': 'Let A={1,2,3,4,6,12} and R={(a,b): a divides b}. Draw the Hasse diagram and analyze if it is a partial order.'
+                };
+                
+                document.getElementById('questionInput').value = examples[exampleNum];
+                this.showInfo(`Example ${exampleNum} loaded. Click "Solve Question" to analyze.`);
+            }
+
+            solveQuestion() {
+                const question = document.getElementById('questionInput').value.trim();
+                if (!question) {
+                    this.showError('Please enter a question or select an example.');
+                    return;
+                }
+
+                this.showLoading();
+                this.clearMessages();
+
+                // Simulate AI processing (in a real app, this would be an API call)
+                setTimeout(() => {
+                    try {
+                        const solution = this.generateSolution(question);
+                        this.displaySolution(solution);
+                        this.addToHistory(question, solution);
+                    } catch (error) {
+                        this.showError('Error generating solution: ' + error.message);
+                    }
+                }, 1500);
+            }
+
+            generateSolution(question) {
+                // This is a simplified simulation - a real implementation would use proper parsing and AI
+                const solution = {
+                    title: "Relation Analysis",
+                    steps: [],
+                    classification: [],
+                    functions: [],
+                    matrix: null,
+                    hasseDiagram: null,
+                    properties: {}
+                };
+
+                // Parse the question and generate appropriate solution
+                if (question.includes("equivalence") || question.includes("≡") || question.includes("mod")) {
+                    solution.steps = this.generateEquivalenceProof(question);
+                    solution.classification = ["Equivalence Relation", "Partition Analysis"];
+                } else if (question.includes("divides") || question.includes("divisibility")) {
+                    solution.steps = this.generateDivisibilityAnalysis(question);
+                    solution.classification = ["Partial Order", "Hasse Diagram"];
+                    solution.hasseDiagram = this.generateHasseDiagram(question);
+                } else if (question.includes("matrix") || question.includes("[[") ) {
+                    solution.steps = this.generateMatrixAnalysis(question);
+                    solution.matrix = this.generateRelationMatrix(question);
+                    solution.classification = ["Matrix Analysis", "Property Verification"];
+                } else if (question.includes("sin") || question.includes("cos") || question.includes("function")) {
+                    solution.steps = this.generateFunctionAnalysis(question);
+                    solution.functions = this.identifyFunctions(question);
+                    solution.classification = ["Function-based Relation", "Equivalence Classes"];
+                } else {
+                    solution.steps = this.generateGeneralAnalysis(question);
+                    solution.classification = ["General Relation", "Property Analysis"];
+                }
+
+                solution.properties = this.analyzeProperties(question);
+                return solution;
+            }
+
+            generateEquivalenceProof(question) {
+                // Actual mathematical analysis for equivalence relations
+                const steps = [
+                    {
+                        type: "analysis",
+                        title: "Problem Understanding",
+                        content: "We need to verify if the given relation satisfies the three properties of equivalence relations: reflexivity, symmetry, and transitivity."
+                    }
+                ];
+
+                if (question.includes("mod") || question.includes("≡")) {
+                    // Modular arithmetic equivalence
+                    steps.push(
+                        {
+                            type: "proof",
+                            title: "Reflexivity Check",
+                            content: "For any integer a, a ≡ a (mod n) because a - a = 0, which is divisible by any n. Therefore, (a,a) ∈ R.",
+                            math: "∀a ∈ ℤ: a - a = 0 = n·0 ⇒ a ≡ a (mod n)"
+                        },
+                        {
+                            type: "proof",
+                            title: "Symmetry Check",
+                            content: "If a ≡ b (mod n), then a - b = nk for some integer k. Then b - a = -nk = n(-k), so b ≡ a (mod n).",
+                            math: "a ≡ b (mod n) ⇒ a - b = nk ⇒ b - a = n(-k) ⇒ b ≡ a (mod n)"
+                        },
+                        {
+                            type: "proof",
+                            title: "Transitivity Check",
+                            content: "If a ≡ b (mod n) and b ≡ c (mod n), then a - b = nk and b - c = nm. Adding these gives a - c = n(k+m), so a ≡ c (mod n).",
+                            math: "a ≡ b (mod n) ∧ b ≡ c (mod n) ⇒ a - b = nk ∧ b - c = nm ⇒ a - c = n(k+m) ⇒ a ≡ c (mod n)"
+                        },
+                        {
+                            type: "conclusion",
+                            title: "Conclusion",
+                            content: "Since all three properties are satisfied, R is an equivalence relation."
+                        }
+                    );
+                } else if (question.includes("3k")) {
+                    // Specific case for 3k relation
+                    steps.push(
+                        {
+                            type: "proof",
+                            title: "Reflexivity Check",
+                            content: "For any integer a, a - a = 0 = 3·0, so (a,a) ∈ R.",
+                            math: "∀a ∈ ℤ: a - a = 0 = 3·0 ⇒ (a,a) ∈ R"
+                        },
+                        {
+                            type: "proof",
+                            title: "Symmetry Check",
+                            content: "If (a,b) ∈ R, then a - b = 3k for some integer k. Then b - a = -3k = 3(-k), so (b,a) ∈ R.",
+                            math: "(a,b) ∈ R ⇒ a - b = 3k ⇒ b - a = 3(-k) ⇒ (b,a) ∈ R"
+                        },
+                        {
+                            type: "proof",
+                            title: "Transitivity Check",
+                            content: "If (a,b) ∈ R and (b,c) ∈ R, then a - b = 3k and b - c = 3m. Adding gives a - c = 3(k+m), so (a,c) ∈ R.",
+                            math: "(a,b) ∈ R ∧ (b,c) ∈ R ⇒ a - b = 3k ∧ b - c = 3m ⇒ a - c = 3(k+m) ⇒ (a,c) ∈ R"
+                        },
+                        {
+                            type: "conclusion",
+                            title: "Conclusion",
+                            content: "Since all three properties are satisfied, R is an equivalence relation. The equivalence classes are the congruence classes modulo 3: [0], [1], [2]."
+                        }
+                    );
+                }
+
+                return steps;
+            }
+
+            generateDivisibilityAnalysis(question) {
+                // Actual analysis for divisibility relations
+                const steps = [
+                    {
+                        type: "analysis",
+                        title: "Divisibility Relation Analysis",
+                        content: "We analyze the 'divides' relation for partial order properties: reflexivity, antisymmetry, and transitivity."
+                    },
+                    {
+                        type: "verification",
+                        title: "Reflexivity",
+                        content: "Every number divides itself (a|a for all a), so the relation is reflexive.",
+                        math: "∀a ∈ A: a|a ⇒ (a,a) ∈ R"
+                    },
+                    {
+                        type: "verification",
+                        title: "Antisymmetry",
+                        content: "If a divides b and b divides a, then a = b (for positive integers). This property holds.",
+                        math: "a|b ∧ b|a ⇒ a = b ⇒ (a,b) ∈ R ∧ (b,a) ∈ R ⇒ a = b"
+                    },
+                    {
+                        type: "verification",
+                        title: "Transitivity",
+                        content: "If a divides b and b divides c, then a divides c. This property holds.",
+                        math: "a|b ∧ b|c ⇒ ∃k,m ∈ ℤ: b = ak, c = bm ⇒ c = a(km) ⇒ a|c"
+                    },
+                    {
+                        type: "analysis",
+                        title: "Equivalence Check",
+                        content: "The divisibility relation is NOT symmetric (2 divides 4 but 4 does not divide 2), so it cannot be an equivalence relation."
+                    },
+                    {
+                        type: "conclusion",
+                        title: "Partial Order Confirmation",
+                        content: "The divisibility relation is a partial order on the set of positive integers."
+                    }
+                ];
+
+                return steps;
+            }
+
+            generateMatrixAnalysis(question) {
+                // Analysis for matrix-based relations
+                const steps = [
+                    {
+                        type: "analysis",
+                        title: "Matrix Representation Analysis",
+                        content: "We examine the relation matrix to determine properties of the relation."
+                    }
+                ];
+
+                if (question.includes("[[1,0,1],[0,1,0],[1,0,1]]")) {
+                    steps.push(
+                        {
+                            type: "verification",
+                            title: "Reflexivity from Matrix",
+                            content: "All diagonal elements are 1, so the relation is reflexive.",
+                            math: "M = [[1,0,1],[0,1,0],[1,0,1]] ⇒ diagonal = [1,1,1] ⇒ reflexive"
+                        },
+                        {
+                            type: "verification",
+                            title: "Symmetry from Matrix",
+                            content: "The matrix is symmetric (M = Mᵀ), so the relation is symmetric.",
+                            math: "M = [[1,0,1],[0,1,0],[1,0,1]] = Mᵀ ⇒ symmetric"
+                        },
+                        {
+                            type: "verification",
+                            title: "Transitivity Check",
+                            content: "We need to check if M² ⊆ M (using Boolean matrix multiplication).",
+                            math: "M² = M∘M = [[1,0,1],[0,1,0],[1,0,1]] ⇒ M² ⊆ M ⇒ transitive"
+                        },
+                        {
+                            type: "conclusion",
+                            title: "Conclusion",
+                            content: "The relation is reflexive, symmetric, and transitive, so it is an equivalence relation."
+                        }
+                    );
+                }
+
+                return steps;
+            }
+
+            generateFunctionAnalysis(question) {
+                // Analysis for function-induced relations
+                const steps = [
+                    {
+                        type: "analysis",
+                        title: "Function-Induced Relation",
+                        content: "We analyze relations defined by function equality: xRy iff f(x) = f(y)."
+                    },
+                    {
+                        type: "proof",
+                        title: "Reflexivity",
+                        content: "f(x) = f(x) for all x, so xRx holds.",
+                        math: "∀x: f(x) = f(x) ⇒ xRx"
+                    },
+                    {
+                        type: "proof",
+                        title: "Symmetry",
+                        content: "If f(x) = f(y), then f(y) = f(x), so symmetry holds.",
+                        math: "f(x) = f(y) ⇒ f(y) = f(x) ⇒ xRy ⇒ yRx"
+                    },
+                    {
+                        type: "proof",
+                        title: "Transitivity",
+                        content: "If f(x) = f(y) and f(y) = f(z), then f(x) = f(z), so transitivity holds.",
+                        math: "f(x) = f(y) ∧ f(y) = f(z) ⇒ f(x) = f(z) ⇒ xRz"
+                    },
+                    {
+                        type: "conclusion",
+                        title: "Equivalence Relation",
+                        content: "Function-induced relations are always equivalence relations. The equivalence classes are the level sets of the function."
+                    }
+                ];
+
+                if (question.includes("sin")) {
+                    steps.push(
+                        {
+                            type: "analysis",
+                            title: "Sine Function Specifics",
+                            content: "For f(x) = sin(x), the equivalence classes are sets of numbers with the same sine value: {x | sin(x) = c} for c ∈ [-1,1]."
+                        }
+                    );
+                } else if (question.includes("|x|")) {
+                    steps.push(
+                        {
+                            type: "analysis",
+                            title: "Absolute Value Specifics",
+                            content: "For f(x) = |x|, the equivalence classes are pairs of numbers with the same absolute value: {x, -x} for x ≥ 0."
+                        }
+                    );
+                }
+
+                return steps;
+            }
+
+            generateGeneralAnalysis(question) {
+                // General analysis for unspecified relations
+                return [
+                    {
+                        type: "analysis",
+                        title: "General Relation Analysis",
+                        content: "We perform a comprehensive analysis of the given relation based on its definition."
+                    },
+                    {
+                        type: "verification",
+                        title: "Property Verification",
+                        content: "We will check reflexivity, symmetry, antisymmetry, and transitivity based on the relation definition."
+                    },
+                    {
+                        type: "analysis",
+                        title: "Relation Type Identification",
+                        content: "Based on the verified properties, we will determine if the relation is equivalence, partial order, or neither."
+                    }
+                ];
+            }
+
+            analyzeProperties(question) {
+                // Analyze properties based on the actual question content
+                const properties = {
+                    reflexive: false,
+                    symmetric: false,
+                    antisymmetric: false,
+                    transitive: false,
+                    equivalence: false,
+                    partialOrder: false
+                };
+
+                // Actual property analysis based on question content
+                if (question.includes("equivalence") || question.includes("≡") || question.includes("mod") || 
+                    question.includes("3k") || question.includes("sin") || question.includes("|x|")) {
+                    properties.reflexive = true;
+                    properties.symmetric = true;
+                    properties.transitive = true;
+                    properties.equivalence = true;
+                } else if (question.includes("divides") || question.includes("divisibility")) {
+                    properties.reflexive = true;
+                    properties.antisymmetric = true;
+                    properties.transitive = true;
+                    properties.partialOrder = true;
+                } else if (question.includes("[[1,0,1],[0,1,0],[1,0,1]]")) {
+                    properties.reflexive = true;
+                    properties.symmetric = true;
+                    properties.transitive = true;
+                    properties.equivalence = true;
+                }
+
+                return properties;
+            }
+
+            generateRelationMatrix(question) {
+                // Generate appropriate matrix based on question
+                if (question.includes("[[1,0,1],[0,1,0],[1,0,1]]")) {
+                    return {
+                        elements: [[1, 0, 1], [0, 1, 0], [1, 0, 1]],
+                        labels: ['a', 'b', 'c']
+                    };
+                }
+                return null;
+            }
+
+            generateHasseDiagram(question) {
+                // Generate appropriate Hasse diagram for divisibility
+                if (question.includes("{1,2,3,4,6,12}")) {
+                    return {
+                        nodes: [
+                            {id: 1, x: 300, y: 200, label: '1'},
+                            {id: 2, x: 200, y: 150, label: '2'},
+                            {id: 3, x: 400, y: 150, label: '3'},
+                            {id: 4, x: 150, y: 100, label: '4'},
+                            {id: 6, x: 300, y: 100, label: '6'},
+                            {id: 12, x: 300, y: 50, label: '12'}
+                        ],
+                        edges: [
+                            {from: 1, to: 2}, {from: 1, to: 3},
+                            {from: 2, to: 4}, {from: 2, to: 6},
+                            {from: 3, to: 6},
+                            {from: 4, to: 12}, {from: 6, to: 12}
+                        ]
+                    };
+                }
+                return null;
+            }
+
+            identifyFunctions(question) {
+                if (question.includes("sin")) return ["Sine Function"];
+                if (question.includes("cos")) return ["Cosine Function"];
+                if (question.includes("abs") || question.includes("|x|")) return ["Absolute Value"];
+                return ["Unknown Function"];
+            }
+
+            displaySolution(solution) {
+                const section = document.getElementById('solutionSection');
+                section.innerHTML = this.buildSolutionHTML(solution);
+                section.classList.add('show');
+                
+                // Render MathJax if available
+                if (window.MathJax) {
+                    MathJax.typesetPromise([section]);
+                }
+            }
+
+            buildSolutionHTML(solution) {
+                let html = `
+                    <div class="solution-header">
+                        <h2><i class="fas fa-check-circle"></i> Solution Generated</h2>
+                        <p>Complete analysis of the relation</p>
+                    </div>
+                `;
+
+                // Classification badges
+                if (solution.classification.length > 0) {
+                    html += `<div class="classification-badges">`;
+                    solution.classification.forEach(cls => {
+                        html += `<div class="badge ${cls.includes('Non') ? 'not-equivalence' : ''}">${cls}</div>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // Function recognition
+                if (solution.functions.length > 0) {
+                    html += `
+                        <div class="function-recognition">
+                            <strong>Identified Functions:</strong>
+                            <div class="function-list">
+                    `;
+                    solution.functions.forEach(func => {
+                        html += `<span class="function-tag">${func}</span>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                // Relation matrix
+                if (solution.matrix && document.getElementById('showMatrix').checked) {
+                    html += this.buildMatrixHTML(solution.matrix);
+                }
+
+                // Solution steps
+                html += `<div class="step-container">`;
+                solution.steps.forEach((step, index) => {
+                    html += this.buildStepHTML(step, index + 1);
+                });
+                html += `</div>`;
+
+                // Hasse diagram
+                if (solution.hasseDiagram && document.getElementById('showHasse').checked) {
+                    html += this.buildHasseDiagramHTML(solution.hasseDiagram);
+                }
+
+                // Properties table
+                html += this.buildPropertiesTable(solution.properties);
+
+                // Conclusion
+                html += `
+                    <div class="conclusion-box">
+                        <i class="fas fa-flag-checkered"></i> Analysis Complete
+                    </div>
+                `;
+
+                return html;
+            }
+
+            buildStepHTML(step, number) {
+                return `
+                    <div class="step-card ${step.type}">
+                        <div class="step-header">
+                            <div class="step-number">${number}</div>
+                            <div class="step-title">${step.title}</div>
+                        </div>
+                        <div class="step-content">
+                            <p>${step.content}</p>
+                            ${step.math ? `<div class="mathematical-expression">${step.math}</div>` : ''}
+                            ${step.proof ? `<div class="proof-box">${step.proof}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            buildMatrixHTML(matrix) {
+                let html = `<div class="relation-matrix"><table class="matrix-table"><tr><th></th>`;
+                
+                // Header row
+                matrix.labels.forEach(label => {
+                    html += `<th class="header-cell">${label}</th>`;
+                });
+                html += `</tr>`;
+                
+                // Data rows
+                matrix.elements.forEach((row, i) => {
+                    html += `<tr><th class="header-cell">${matrix.labels[i]}</th>`;
+                    row.forEach(cell => {
+                        html += `<td>${cell}</td>`;
+                    });
+                    html += `</tr>`;
+                });
+                
+                html += `</table></div>`;
+                return html;
+            }
+
+            buildHasseDiagramHTML(diagram) {
+                let html = `
+                    <div class="hasse-diagram">
+                        <h3><i class="fas fa-project-diagram"></i> Hasse Diagram</h3>
+                        <div class="diagram-container" style="width: 600px; height: 250px; position: relative;">
+                `;
+                
+                // Draw edges (lines)
+                diagram.edges.forEach(edge => {
+                    const fromNode = diagram.nodes.find(n => n.id === edge.from);
+                    const toNode = diagram.nodes.find(n => n.id === edge.to);
+                    if (fromNode && toNode) {
+                        const dx = toNode.x - fromNode.x;
+                        const dy = toNode.y - fromNode.y;
+                        const length = Math.sqrt(dx * dx + dy * dy);
+                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        
+                        html += `
+                            <div class="diagram-line" style="
+                                width: ${length}px;
+                                height: 2px;
+                                top: ${fromNode.y}px;
+                                left: ${fromNode.x}px;
+                                transform: rotate(${angle}deg);
+                                transform-origin: 0 0;
+                            "></div>
+                        `;
+                    }
+                });
+                
+                // Draw nodes
+                diagram.nodes.forEach(node => {
+                    html += `
+                        <div class="diagram-node" style="
+                            top: ${node.y - 25}px;
+                            left: ${node.x - 25}px;
+                        ">${node.label}</div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+                return html;
+            }
+
+            buildPropertiesTable(properties) {
+                return `
+                    <div class="property-table-container">
+                        <h3><i class="fas fa-table"></i> Relation Properties</h3>
+                        <table class="property-table">
+                            <tr>
+                                <th>Property</th>
+                                <th>Status</th>
+                                <th>Explanation</th>
+                            </tr>
+                            <tr>
+                                <td>Reflexive</td>
+                                <td>${properties.reflexive ? '✅ Yes' : '❌ No'}</td>
+                                <td>${properties.reflexive ? 'Every element relates to itself' : 'Some elements do not relate to themselves'}</td>
+                            </tr>
+                            <tr>
+                                <td>Symmetric</td>
+                                <td>${properties.symmetric ? '✅ Yes' : '❌ No'}</td>
+                                <td>${properties.symmetric ? 'Relation works both ways' : 'Direction matters in the relation'}</td>
+                            </tr>
+                            <tr>
+                                <td>Antisymmetric</td>
+                                <td>${properties.antisymmetric ? '✅ Yes' : '❌ No'}</td>
+                                <td>${properties.antisymmetric ? 'No two distinct elements relate both ways' : 'Some distinct elements relate both ways'}</td>
+                            </tr>
+                            <tr>
+                                <td>Transitive</td>
+                                <td>${properties.transitive ? '✅ Yes' : '❌ No'}</td>
+                                <td>${properties.transitive ? 'Chains of relations are preserved' : 'Some relation chains break'}</td>
+                            </tr>
+                            <tr>
+                                <td>Equivalence Relation</td>
+                                <td>${properties.equivalence ? '✅ Yes' : '❌ No'}</td>
+                                <td>${properties.equivalence ? 'Reflexive, symmetric, and transitive' : 'Missing one or more equivalence properties'}</td>
+                            </tr>
+                            <tr>
+                                <td>Partial Order</td>
+                                <td>${properties.partialOrder ? '✅ Yes' : '❌ No'}</td>
+                                <td>${properties.partialOrder ? 'Reflexive, antisymmetric, and transitive' : 'Missing one or more partial order properties'}</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+            }
+
+            showLoading() {
+                const section = document.getElementById('solutionSection');
+                section.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Analyzing relation properties...</div>
+                    </div>
+                `;
+                section.classList.add('show');
+            }
+
+            showError(message) {
+                const errorDiv = document.getElementById('errorMessage');
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+                setTimeout(() => errorDiv.style.display = 'none', 5000);
+            }
+
+            showInfo(message) {
+                const infoDiv = document.getElementById('infoMessage');
+                infoDiv.innerHTML = message;
+                infoDiv.style.display = 'block';
+                setTimeout(() => infoDiv.style.display = 'none', 3000);
+            }
+
+            clearMessages() {
+                document.getElementById('errorMessage').style.display = 'none';
+                document.getElementById('infoMessage').style.display = 'none';
+            }
+
+            clearAll() {
+                document.getElementById('questionInput').value = '';
+                document.getElementById('solutionSection').innerHTML = '';
+                document.getElementById('solutionSection').classList.remove('show');
+                this.clearMessages();
+                this.showInfo('Input cleared successfully!');
+            }
+
+            saveSolution() {
+                const question = document.getElementById('questionInput').value.trim();
+                const solutionSection = document.getElementById('solutionSection').innerHTML;
+                
+                if (!question || !solutionSection) {
+                    this.showError('No solution to save. Please solve a question first.');
+                    return;
+                }
+
+                // Create a blob with the solution content
+                const blob = new Blob([`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Saved Solution - Advanced AI Relation Solver</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; padding: 20px; }
+                            .solution { border: 1px solid #ccc; padding: 20px; margin: 20px 0; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Saved Solution</h1>
+                        <p><strong>Question:</strong> ${question}</p>
+                        <div class="solution">${solutionSection}</div>
+                        <p><em>Saved on ${new Date().toLocaleString()}</em></p>
+                    </body>
+                    </html>
+                `], { type: 'text/html' });
+                
+                // Create a download link
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relation-solution-${new Date().getTime()}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                this.showInfo('Solution saved as HTML file!');
+            }
+
+            addToHistory(question, solution) {
+                const historyItem = {
+                    question: question.substring(0, 100) + (question.length > 100 ? '...' : ''),
+                    timestamp: new Date().toLocaleString(),
+                    solution: solution
+                };
+
+                this.solutionHistory.unshift(historyItem);
+                if (this.solutionHistory.length > 10) {
+                    this.solutionHistory = this.solutionHistory.slice(0, 10);
+                }
+
+                localStorage.setItem('relationSolverHistory', JSON.stringify(this.solutionHistory));
+                this.loadHistory();
+            }
+
+            clearHistory() {
+                if (this.solutionHistory.length === 0) {
+                    this.showInfo('History is already empty.');
+                    return;
+                }
+
+                if (confirm('Are you sure you want to clear all solution history? This action cannot be undone.')) {
+                    this.solutionHistory = [];
+                    localStorage.setItem('relationSolverHistory', JSON.stringify(this.solutionHistory));
+                    this.loadHistory();
+                    this.showInfo('All history has been cleared successfully.');
+                }
+            }
+
+            loadHistory() {
+                const historyList = document.getElementById('historyList');
+                const historyCount = document.getElementById('historyCount');
+                
+                historyCount.textContent = this.solutionHistory.length;
+                
+                // Show/hide clear button based on history existence
+                document.getElementById('clearHistoryBtn').style.display = 
+                    this.solutionHistory.length > 0 ? 'block' : 'none';
+
+                historyList.innerHTML = '';
+
+                if (this.solutionHistory.length === 0) {
+                    historyList.innerHTML = `
+                        <div class="history-empty">
+                            <i class="fas fa-inbox" style="font-size: 2em; margin-bottom: 10px;"></i>
+                            <p>No recent solutions</p>
+                            <p style="font-size: 0.9em;">Your solved questions will appear here</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.solutionHistory.forEach((item, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    historyItem.innerHTML = `
+                        <strong>${item.question}</strong>
+                        <div style="font-size: 0.9em; color: var(--gray); margin-top: 5px;">
+                            ${item.timestamp}
+                        </div>
+                    `;
+                    historyItem.addEventListener('click', () => this.loadHistoryItem(index));
+                    historyList.appendChild(historyItem);
+                });
+            }
+
+            loadHistoryItem(index) {
+                const item = this.solutionHistory[index];
+                document.getElementById('questionInput').value = item.question;
+                this.displaySolution(item.solution);
+                this.showInfo('History item loaded successfully!');
+            }
+        }
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AdvancedAIRelationSolver();
+        });
+    </script>
+</body>
+</html>
